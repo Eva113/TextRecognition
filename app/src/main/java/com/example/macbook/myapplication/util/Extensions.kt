@@ -1,11 +1,15 @@
 package com.example.macbook.myapplication.util
 
+import android.Manifest
 import android.content.Context
+import android.content.pm.PackageManager
 import android.hardware.Camera
 import android.os.Build
+import android.support.v4.content.ContextCompat
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowInsets
+import java.security.Permission
 
 fun View.applyWindowInsets(callback: (WindowInsets) -> Unit) {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT_WATCH) {
@@ -41,5 +45,8 @@ fun Camera.Parameters.setOptimalPreviewSize(width: Int, height: Int) {
 
     setPreviewSize(optimalSize.width, optimalSize.height)
 
+}
 
+fun Context.checkCameraPermission() : Boolean {
+    return ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED
 }

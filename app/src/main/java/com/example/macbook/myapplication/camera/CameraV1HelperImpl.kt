@@ -1,17 +1,24 @@
 package com.example.macbook.myapplication.camera
 
+import android.Manifest
+import android.content.Context
+import android.content.Intent
 import android.graphics.SurfaceTexture
 import android.hardware.Camera
-import android.util.Log
+import android.net.Uri
+import android.provider.Settings
+import com.example.macbook.myapplication.util.checkCameraPermission
 import com.example.macbook.myapplication.util.setOptimalPreviewSize
+import com.vanniktech.rxpermission.Permission
+import com.vanniktech.rxpermission.RealRxPermission
 import io.reactivex.Observable
 import io.reactivex.subjects.PublishSubject
+import org.jetbrains.anko.toast
 import java.io.IOException
 import java.lang.Exception
-import java.util.logging.Logger
 
 @Suppress("DEPRECATION")
-class CameraV1HelperImpl: CameraHelper {
+class CameraV1HelperImpl(val context: Context) : CameraHelper {
 
     private lateinit var camera: Camera
     private lateinit var backCameraInfo: Camera.CameraInfo
@@ -21,10 +28,10 @@ class CameraV1HelperImpl: CameraHelper {
 
     private val cameraPreviewSubject = PublishSubject.create<ByteArray>()
 
-
-    private var istextureReady = false
-
     private val backCamera: Pair<Camera.CameraInfo, Int> = getBackCamera()
+
+    private var isCameraStarted: Boolean = false
+    private var isTextureReady: Boolean = false
 
 
     private fun getBackCamera(): Pair<Camera.CameraInfo, Int> {
@@ -39,29 +46,60 @@ class CameraV1HelperImpl: CameraHelper {
                     Integer.valueOf(i)
                 )
             }
-
         }
-        throw Exception("Not back camera found")
+        throw Exception("Back camera not found")
     }
 
     private fun cameraDisplayRotation() {
         val displayOrientation = (backCameraInfo.orientation - 0 + 360) % 360
         camera.setDisplayOrientation(displayOrientation)
+
     }
 
     override fun attachSurfaceTexture(surfaceTexture: SurfaceTexture, width: Int, height: Int) {
         this.surfaceTexture = surfaceTexture
         this.width = width
         this.height = height
-        istextureReady = true
+        isTextureReady = true
+        startCamera()
+    }
+
+    private fun requeatPermission(){
+        val disposable = RealRxPermission.getInstance(context)
+            .request(Manifest.permission.CAMERA)
+            .subscribe { it ->
+                when (it.state()) {
+                    Permission.State.GRANTED ->
+                        startCamera()
+                    Permission.State.DENIED -> {
+                        context.toast("Pleae provide camera permission")
+                    }
+                    Permission.State.DENIED_NOT_SHOWN -> {
+                        val intent = Intent()
+                        intent.action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
+                        val uri = Uri.fromParts("package", context.packageName, null)
+                        intent.data = uri
+                        context.startActivity(intent)
+
+                    }
+                }
+            }
     }
 
     override fun startCamera() {
-        if (!istextureReady) {
+        if (!context.checkCameraPermission()) {
+            requeatPermission()
             return
         }
+
+        if (isCameraStarted || !isTextureReady) {
+            return
+        }
+
+        isCameraStarted = true
         backCameraInfo = backCamera.first
         camera = Camera.open(backCamera.second)
+
         cameraDisplayRotation()
         camera.setPreviewCallback { data, camera ->
             cameraPreviewSubject.onNext(
@@ -69,11 +107,11 @@ class CameraV1HelperImpl: CameraHelper {
             )
         }
 
-        val params = camera.parameters
-        params.setOptimalPreviewSize(width, height)
-        params.focusMode = Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO
-        camera.parameters = params
-        Log.e("DAS", "WW" + width + "HH " + height)
+        camera.parameters.apply {
+            setOptimalPreviewSize(width, height)
+            focusMode = Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO
+            camera.parameters = this
+        }
 
         try {
             camera.setPreviewTexture(surfaceTexture)
@@ -84,11 +122,15 @@ class CameraV1HelperImpl: CameraHelper {
     }
 
     override fun stopCamera() {
-        camera.stopPreview()
-        camera.release()
+        if (isCameraStarted) {
+            camera.stopPreview()
+            camera.setPreviewCallback(null)
+            camera.release()
+            isCameraStarted = false
+        }
     }
 
-    override fun cameraFrames(): Observable<ByteArray>{
+    override fun cameraFrames(): Observable<ByteArray> {
         return cameraPreviewSubject
     }
 
