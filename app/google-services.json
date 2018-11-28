@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "202776687501",
+    "firebase_url": "https://livetextrecognition.firebaseio.com",
+    "project_id": "livetextrecognition",
+    "storage_bucket": "livetextrecognition.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:202776687501:android:b800a4557699d72a",
+        "android_client_info": {
+          "package_name": "com.example.macbook.myapplication"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "202776687501-rn8i58sesmcmhtj8qlbc3rhk8a28vaph.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDpl4SlO4AJsi2DAEH7hBGi6sCuZlvu-o0"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

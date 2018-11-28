@@ -16,6 +16,7 @@ import io.reactivex.subjects.PublishSubject
 import org.jetbrains.anko.toast
 import java.io.IOException
 import java.lang.Exception
+import java.nio.ByteBuffer
 
 @Suppress("DEPRECATION")
 class CameraV1HelperImpl(val context: Context) : CameraHelper {
@@ -102,9 +103,7 @@ class CameraV1HelperImpl(val context: Context) : CameraHelper {
 
         cameraDisplayRotation()
         camera.setPreviewCallback { data, camera ->
-            cameraPreviewSubject.onNext(
-                data
-            )
+            data?.let { cameraPreviewSubject.onNext(it) }
         }
 
         camera.parameters.apply {
