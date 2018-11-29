@@ -7,6 +7,7 @@ import android.graphics.SurfaceTexture
 import android.hardware.Camera
 import android.net.Uri
 import android.provider.Settings
+import com.example.macbook.myapplication.model.PreviewFrame
 import com.example.macbook.myapplication.util.checkCameraPermission
 import com.example.macbook.myapplication.util.setOptimalPreviewSize
 import com.vanniktech.rxpermission.Permission
@@ -16,7 +17,6 @@ import io.reactivex.subjects.PublishSubject
 import org.jetbrains.anko.toast
 import java.io.IOException
 import java.lang.Exception
-import java.nio.ByteBuffer
 
 @Suppress("DEPRECATION")
 class CameraV1HelperImpl(val context: Context) : CameraHelper {
@@ -24,10 +24,12 @@ class CameraV1HelperImpl(val context: Context) : CameraHelper {
     private lateinit var camera: Camera
     private lateinit var backCameraInfo: Camera.CameraInfo
     private lateinit var surfaceTexture: SurfaceTexture
-    private var width: Int = 0
-    private var height: Int = 0
+    private val previewFrameParams = PreviewFrame()
 
-    private val cameraPreviewSubject = PublishSubject.create<ByteArray>()
+    private var width = 0
+    private var height = 0
+
+    private val cameraPreviewSubject = PublishSubject.create<PreviewFrame>()
 
     private val backCamera: Pair<Camera.CameraInfo, Int> = getBackCamera()
 
@@ -54,7 +56,7 @@ class CameraV1HelperImpl(val context: Context) : CameraHelper {
     private fun cameraDisplayRotation() {
         val displayOrientation = (backCameraInfo.orientation - 0 + 360) % 360
         camera.setDisplayOrientation(displayOrientation)
-
+        previewFrameParams.rotation = displayOrientation
     }
 
     override fun attachSurfaceTexture(surfaceTexture: SurfaceTexture, width: Int, height: Int) {
@@ -73,7 +75,7 @@ class CameraV1HelperImpl(val context: Context) : CameraHelper {
                     Permission.State.GRANTED ->
                         startCamera()
                     Permission.State.DENIED -> {
-                        context.toast("Pleae provide camera permission")
+                        context.toast("Please provide camera permission")
                     }
                     Permission.State.DENIED_NOT_SHOWN -> {
                         val intent = Intent()
@@ -103,12 +105,15 @@ class CameraV1HelperImpl(val context: Context) : CameraHelper {
 
         cameraDisplayRotation()
         camera.setPreviewCallback { data, camera ->
-            data?.let { cameraPreviewSubject.onNext(it) }
+            data?.let { cameraPreviewSubject.onNext(previewFrameParams.copy(data = it)) }
         }
 
         camera.parameters.apply {
             setOptimalPreviewSize(width, height)
             focusMode = Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO
+            previewFrameParams.width = previewSize.width
+            previewFrameParams.height = previewSize.height
+            previewFrameParams.imageFormat = previewFormat
             camera.parameters = this
         }
 
@@ -129,7 +134,7 @@ class CameraV1HelperImpl(val context: Context) : CameraHelper {
         }
     }
 
-    override fun cameraFrames(): Observable<ByteArray> {
+    override fun cameraFrames(): Observable<PreviewFrame> {
         return cameraPreviewSubject
     }
 

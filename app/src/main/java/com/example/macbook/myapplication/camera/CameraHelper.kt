@@ -1,8 +1,8 @@
 package com.example.macbook.myapplication.camera
 
 import android.graphics.SurfaceTexture
+import com.example.macbook.myapplication.model.PreviewFrame
 import io.reactivex.Observable
-import java.nio.ByteBuffer
 
 interface CameraHelper {
 
@@ -12,6 +12,6 @@ interface CameraHelper {
 
     fun stopCamera()
 
-    fun cameraFrames(): Observable<ByteArray>
+    fun cameraFrames(): Observable<PreviewFrame>
 
 }

@@ -9,7 +9,6 @@ import android.support.v4.content.ContextCompat
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowInsets
-import java.security.Permission
 
 fun View.applyWindowInsets(callback: (WindowInsets) -> Unit) {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT_WATCH) {
