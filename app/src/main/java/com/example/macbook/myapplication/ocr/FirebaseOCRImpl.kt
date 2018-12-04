@@ -9,11 +9,9 @@ import com.google.firebase.ml.vision.FirebaseVision
 import com.google.firebase.ml.vision.common.FirebaseVisionImage
 import com.google.firebase.ml.vision.common.FirebaseVisionImageMetadata
 import com.google.firebase.ml.vision.text.FirebaseVisionText
+import com.google.firebase.ml.vision.text.FirebaseVisionTextRecognizer
 
-class FirebaseOCRImpl(private val tts: TextToSpeech) : OCR {
-
-    private val detector = FirebaseVision.getInstance()
-        .onDeviceTextRecognizer
+class FirebaseOCRImpl(private val tts: TextToSpeech, private val detector: FirebaseVisionTextRecognizer) : OCR {
 
     private var shouldIgnore = true
     private var interrupt = false
