@@ -23,7 +23,7 @@ val ocrModule = module {
 
     single<CameraHelper> { CameraV1HelperImpl(androidContext()) }
 
-    single<FirebaseVisionTextRecognizer> { FirebaseVision.getInstance()
-        .onDeviceTextRecognizer }
+    single<FirebaseVisionTextRecognizer> {
+        FirebaseVision.getInstance().onDeviceTextRecognizer }
 
 }

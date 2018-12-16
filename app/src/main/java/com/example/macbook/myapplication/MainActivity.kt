@@ -12,6 +12,7 @@ import kotlinx.android.synthetic.main.activity_main.*
 import org.jetbrains.anko.contentView
 import org.jetbrains.anko.toast
 import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.schedulers.Schedulers
 import org.koin.android.ext.android.inject
 
 
@@ -52,6 +53,7 @@ class MainActivity : AppCompatActivity() {
             if (isChecked) {
                 toast("Started")
                 compositeDisposable.add(cameraHelper.cameraFrames().subscribe(ocr))
+                cameraHelper.cameraFrames().subscribeOn(Schedulers.io()).observeOn(Schedulers.computation())
                 ocr.startTalking()
             } else {
                 toast("Stopped")

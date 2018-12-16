@@ -7,7 +7,9 @@ import android.graphics.SurfaceTexture
 import android.hardware.Camera
 import android.net.Uri
 import android.provider.Settings
+import com.example.macbook.myapplication.MainActivity
 import com.example.macbook.myapplication.model.PreviewFrame
+import com.example.macbook.myapplication.ocr.FirebaseOCRImpl
 import com.example.macbook.myapplication.util.checkCameraPermission
 import com.example.macbook.myapplication.util.setOptimalPreviewSize
 import com.vanniktech.rxpermission.Permission
